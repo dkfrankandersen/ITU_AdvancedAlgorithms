@@ -63,6 +63,7 @@ def satAssigment(dnf):
     print(f"Is minimal index: {isMinimal}")
     print()
 
+
 # Notations:
 # not: !
 # and: and  
