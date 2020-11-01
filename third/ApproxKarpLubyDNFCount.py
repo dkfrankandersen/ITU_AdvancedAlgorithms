@@ -83,27 +83,34 @@ class ApproxKarpLubyDNFCount:
 
 if __name__ == "__main__":
     akl = ApproxKarpLubyDNFCount()
-    t = 3 # t clauses
-    n = 1000 # n variables
+    t = 30 # t clauses
+    n = 10 # n variables
     # m samplings
     
-    cases = range(1,n+1)
-    test1 =  [akl.sampling(akl.randomDiffClauses(t,n), n, m) for m in cases]
-    test2 =  [akl.sampling(akl.allSameClauses(t,n), n, m) for m in cases]
-    test3 =  [akl.sampling(akl.allTrueClauses(t,n), n, m) for m in cases]
+    cases = range(1,1000+1)
+
+
 
     # test3 =  [akl.sampling(akl.randomClauses(t,n), n, m) for m in range(1,1001)]
     fig, axs = plt.subplots(3)
     # fig.suptitle('Approx Karp Luby DNF Count')
+
+
+    test1 =  [akl.sampling(akl.randomDiffClauses(t,n), n, m) for m in cases]
     axs[0].plot(cases, test1, linewidth = 1.0, color = "blue")
     axs[0].set_title('randomDiffClauses')
     axs[0].set(xlabel='# of samples', ylabel='# approx sat assign')
+
+    test2 =  [akl.sampling(akl.allSameClauses(t,n), n, m) for m in cases]
     axs[1].plot(cases, test2, linewidth = 1.0, color = "red")
     axs[1].set_title('allSameClauses')
-    axs[2].set(xlabel='# of samples', ylabel='# approx sat assign')
+    axs[1].set(xlabel='# of samples', ylabel='# approx sat assign')
+
+    test3 =  [akl.sampling(akl.allTrueClauses(t,n), n, m) for m in cases]
     axs[2].plot(cases, test3, linewidth = 1.0, color = "green")
-    axs[2].set_title('oddEvenClauses')
+    axs[2].set_title('allTrueClauses')
     axs[2].set(xlabel='# of samples', ylabel='# approx sat assign')
+
     fig.tight_layout()
     plt.legend()
     
