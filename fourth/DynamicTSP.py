@@ -129,6 +129,7 @@ class Graph:
     
     def isConnected(self):
         visited = [0 for _ in range(len(self.V))]
+        print(len(visited))
         start = list(self.V.keys())[0]
         adj = list(self.V[start])
         while adj:
@@ -139,7 +140,6 @@ class Graph:
 
         return sum(visited) == len(self.V)
             
-
     def findEulerPath(self):
         # Hierholzer’s algorithm can find Euler Path in linear time, O(E)
         
@@ -197,11 +197,11 @@ class Graph:
         dist = 0
         last = path[-1]
         for v in path:
-            dist += last.haversineDistance(v)
+            dist += Vertex.haversineDistance(last,v)
             last = v
         
         return path, dist
-
+    
 def readInput():
     cities = []
     for line in sys.stdin.readlines():
@@ -244,10 +244,3 @@ if __name__ == "__main__" :
             if not v == w:
                 g.addEdge(Edge(v, w, v.haversineDistance(w)))
 
-    (tspPath, dist) = g.findTSP()
-    for v in tspPath:
-        print(v)
-    print()
-    print(f"Dist: {dist}")
-    
-    # gMST.print()
