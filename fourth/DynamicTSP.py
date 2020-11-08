@@ -1,6 +1,6 @@
 import sys
 import math
-from typing import Deque
+import numpy as np
 
 class Vertex:
     def __init__(self, key:int, name:str, lat:float, lon:float):
@@ -104,28 +104,6 @@ class Graph:
         # for v in self.V:
         #     print(f"{v.key} -> {v.adjEdges()}")
         # print()
-
-    def primMST(self):
-        start = list(self.V.keys())[0]
-        mstEdges = []
-        mstVertices = []
-        mstVertices.append(start)
-
-        q = Deque()
-        q.append(start)
-        
-        while q:
-            this = q.pop()
-            sortedEdges = sorted(self.V[this], key=lambda x: x.weight, reverse=False)
-            for e in sortedEdges:
-                if not this == e.dst and e.dst not in mstVertices:
-                    mstVertices.append(e.dst)
-                    mstEdges.append(e)
-                    q.append(e.dst)
-                    break
-
-        totalWeight = sum([e.weight for e in mstEdges])
-        return (mstVertices, mstEdges, totalWeight)
     
     def isConnected(self):
         visited = [0 for _ in range(len(self.V))]
@@ -139,68 +117,6 @@ class Graph:
                     adj.extend(self.V[e.dst])
 
         return sum(visited) == len(self.V)
-            
-    def findEulerPath(self):
-        # Hierholzer’s algorithm can find Euler Path in linear time, O(E)
-        
-        # First, make sure that the input graph G is connected 
-        if not self.isConnected():
-            print("findEulerPath: graph not connected...")
-            return None
-
-        # select a starting vertex
-        start = list(self.V)[0]
-
-        # Check that graph contains exactly 0 or 2 odd degree vertices.
-        countOdd = 0
-        for k,v in self.V.items():
-            if not len(v) % 2 == 0:
-                countOdd += 1
-                start = k
-        if countOdd == 0 or not countOdd == 2:
-            print("Error: should contain exactly 0 or 2 odd degree vertices.")
-            return
-
-        # Making a copy to delete from
-        tmp = self.copy()
-        tempPath = [start]
-        finalPath = []
-        
-        while tempPath:
-            v = tempPath[-1]
-            if tmp.V[v]:
-                e = tmp.V[v].pop()
-                tempPath.append(e.dst)
-            else:
-                tempPath.remove(v)
-                finalPath.append(v)
-        return finalPath
-
-    def findTSP(self):
-        # Run MST on graph
-        (vertices,edges,_) = g.primMST()
-
-        # Build new graph from edges
-        gMST = Graph()
-        gMST.addVertices(vertices)
-        for e in edges:
-            gMST.addEdge(e)
-            gMST.addEdge(Edge(e.dst, e.src, e.weight))
-        
-        eulerPath = gMST.findEulerPath()
-        path = []
-        for v in eulerPath:
-            if v not in path:
-                path.append(v)
-        path.append(eulerPath[0])
-
-        dist = 0
-        last = path[-1]
-        for v in path:
-            dist += Vertex.haversineDistance(last,v)
-            last = v
-        
-        return path, dist
     
 def readInput():
     cities = []
@@ -244,3 +160,27 @@ if __name__ == "__main__" :
             if not v == w:
                 g.addEdge(Edge(v, w, v.haversineDistance(w)))
 
+    # verticeMap = dict()
+    # table = [ dict for _ in range(len(g.V))]
+
+    # i = 0
+    # for e in g.allEdges():
+    #     table[e.src].append(e.src.haversineDistance(e.dst))
+    #     verticeMap[i] = e.src
+    #     i += 1
+    
+    # print(np.matrix(table))
+
+    # path = []
+    # for i in range(len(table)):
+    #     pos = -1
+    #     dist = float("inf")
+    #     for j in range(len(table[i])):
+    #         if table[i][j] < dist:
+    #             dist = table[i][j]
+    #             pos = j
+    #     path.append((pos,dist))
+
+    for v in path:
+        (pos,dist) = v
+        print(verticeMap[pos])
