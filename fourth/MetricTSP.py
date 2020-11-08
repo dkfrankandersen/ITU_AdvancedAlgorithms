@@ -12,6 +12,19 @@ class Vertex:
     def __str__(self):
         return f"{self.key} {self.name} ({self.lat} | {self.lon})"
 
+    def haversineDistance(self,dst:'Vertex') -> float:
+        pi180 = math.pi/180
+        phi1 = self.lat * pi180
+        phi2 = dst.lat * pi180
+        dPhi = (dst.lat-self.lat) * pi180
+        dLambda = (self.lon-dst.lon) * pi180
+
+        R = 6371e3 # metres
+        a = math.sin(dPhi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dLambda/2)**2 # Haversine
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt((1-a)))
+        d = R*c
+        return d
+
 class Edge:
     def __init__(self, src:Vertex, dst:Vertex, weight:float):
         self.src = src
@@ -43,12 +56,16 @@ class Graph:
                 count += 1
         return count
 
-    def getVertices(self) -> list:
+    def allVerticeKeys(self) -> list:
         return list(self.V.keys())
 
     def addEdge(self, edge:Edge):
         self.V[edge.src].append(edge)
         self.E += 1
+
+    def addEdges(self, edges):
+        for edge in edges:
+            self.addEdge(self, edge)
 
     def adjEdges(self, v:Vertex) -> list:
         return self.V[v]
@@ -69,8 +86,11 @@ class Graph:
     def edgeExists(self, src, dst):
         True if dst in self.V[src] else False
 
-    def __str__(self):
-        return 
+    def copy(self):
+        g = Graph()
+        g.V = self.V.copy()
+        g.E = self.E
+        return g
 
     def print(self):
         print(f"# of vertices: {len(self.V)}")
@@ -125,48 +145,66 @@ class Graph:
         # Hierholzer’s algorithm can find Euler Path in linear time, O(E)
         
         # First, make sure that the input graph G is connected 
-        start = list(self.V.keys())[0]
-        self.isConnected()
-        # and contains exactly 0 or 2 odd degree vertices.
+        if not self.isConnected():
+            print("findEulerPath: graph not connected...")
+            return None
+
+        # select a starting vertex
+        start = list(self.V)[0]
+
+        # Check that graph contains exactly 0 or 2 odd degree vertices.
         countOdd = 0
         for k,v in self.V.items():
             if not len(v) % 2 == 0:
                 countOdd += 1
-                start = self.V[k]
-
+                start = k
         if countOdd == 0 or not countOdd == 2:
             print("Error: should contain exactly 0 or 2 odd degree vertices.")
             return
 
-
-        # tempPath = list(start)
-        # finalPath = []
-
-        # u = tempPath.pop()
-
-        # tours = []
-        # edges = self.allEdges().copy()
-        # tour = []
-        # while edges:
-        #     e = edges.pop()
-        #     v = e.src
-        #     w = e.dst
-        #     tour.append(v)
-        #     if w in tour:
-        #         tours.append(tour)
-        #         tour = []
-
-        # for tour in tours:
-        #     for v in tour:
-        #         print(v)
-        #     print()
-
-
-
+        # Making a copy to delete from
+        tmp = self.copy()
+        tempPath = [start]
+        finalPath = []
+        
+        while tempPath:
+            v = tempPath[-1]
+            if tmp.V[v]:
+                e = tmp.V[v].pop()
+                tempPath.append(e.dst)
+            else:
+                tempPath.remove(v)
+                finalPath.append(v)
+        return finalPath
 
     def findTSP(self):
-        g = self.primMST()
-        return
+        # Run MST on graph
+        (vertices,edges,_) = g.primMST()
+
+        # Build new graph from edges
+        gMST = Graph()
+        gMST.addVertices(vertices)
+        for e in edges:
+            gMST.addEdge(e)
+            gMST.addEdge(Edge(e.dst, e.src, e.weight))
+        
+        eulerPath = gMST.findEulerPath()
+        path = []
+        for v in eulerPath:
+            if v not in path:
+                path.append(v)
+        path.append(eulerPath[0])
+
+        dist = 0
+        last = path[-1]
+        for v in path:
+            dist += Vertex.haversineDistance(last,v)
+            last = v
+        
+        return path, dist
+
+    
+    
 
 def readInput():
     cities = []
@@ -196,20 +234,6 @@ def hardcodedInput():
             ("Grenaa", 56.413142, 10.879211)
             ]
 
-
-def haversineDistance(src:Vertex, dst:'Vertex') -> float:
-        pi180 = math.pi/180
-        phi1 = src.lat * pi180
-        phi2 = dst.lat * pi180
-        dPhi = (dst.lat-src.lat) * pi180
-        dLambda = (src.lon-dst.lon) * pi180
-
-        R = 6371e3 # metres
-        a = math.sin(dPhi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dLambda/2)**2 # Haversine
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt((1-a)))
-        d = R*c
-        return d
-
 if __name__ == "__main__" : 
     cities = hardcodedInput()
 
@@ -219,21 +243,15 @@ if __name__ == "__main__" :
         v = Vertex(i, cities[i][0],cities[i][1],cities[i][2])
         g.addVertex(v)
 
-    for v in g.getVertices():
-        for w in g.getVertices():
+    for v in g.allVerticeKeys():
+        for w in g.allVerticeKeys():
             if not v == w:
-                g.addEdge(Edge(v, w, haversineDistance(v,w)))
+                g.addEdge(Edge(v, w, v.haversineDistance(w)))
 
-    # Run MST on graph
-    (vertices,edges,_) = g.primMST()
-
-    # Build new graph from edges
-    gMST = Graph()
-    gMST.addVertices(vertices)
-    for e in edges:
-        gMST.addEdge(e)
-        gMST.addEdge(Edge(e.dst, e.src, e.weight))
-    
-    gMST.findEulerPath()
+    (tspPath, dist) = g.findTSP()
+    for v in tspPath:
+        print(v)
+    print()
+    print(f"Dist: {dist}")
     
     # gMST.print()
