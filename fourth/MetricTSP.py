@@ -1,6 +1,6 @@
 import sys
 import math
-from typing import Deque
+from collections import deque
 
 class Vertex:
     def __init__(self, key:int, name:str, lat:float, lon:float):
@@ -100,10 +100,6 @@ class Graph:
         print()
         print(f"# of edges: {self.E}")
         print(self.allEdgeKeyPairs())
-        # print("Edges:")
-        # for v in self.V:
-        #     print(f"{v.key} -> {v.adjEdges()}")
-        # print()
 
     def primMST(self):
         start = list(self.V.keys())[0]
@@ -111,7 +107,7 @@ class Graph:
         mstVertices = []
         mstVertices.append(start)
 
-        q = Deque()
+        q = deque()
         q.append(start)
         
         while q:
