@@ -1,4 +1,5 @@
 import sys
+import itertools
 import math
 import numpy as np
 
@@ -100,10 +101,6 @@ class Graph:
         print()
         print(f"# of edges: {self.E}")
         print(self.allEdgeKeyPairs())
-        # print("Edges:")
-        # for v in self.V:
-        #     print(f"{v.key} -> {v.adjEdges()}")
-        # print()
     
     def isConnected(self):
         visited = [0 for _ in range(len(self.V))]
@@ -117,6 +114,24 @@ class Graph:
                     adj.extend(self.V[e.dst])
 
         return sum(visited) == len(self.V)
+
+    def setup(self, m, memo, S, N):
+         for e in self.addEdges():
+            if S == e.src: continue
+            memo[e.src.key, e.dst.key]
+        
+
+    def TspDP(self, m, S):
+        N = len(self.V)
+        memo = np.zeros((N, N))
+
+        self.setup(m, memo, S, N)
+        print(memo)
+        # self.solve(m, memo, S, N)
+        # minCost = self.findMinCost(m, memo, S, N)
+        # tour = self.findMintour(m , memo, S, N)
+
+        # return (minCost, tour)
     
 def readInput():
     cities = []
@@ -125,6 +140,15 @@ def readInput():
         lat, lon = coords.split("/")
         cities.append((name, float(lat), float(lon)))
     return cities
+
+
+def simpleGraphInput():
+    return [  
+            ("A", 55.676, 12.566),
+            ("B", 56.157, 10.211),
+            ("C", 55.396, 10.388),
+            ("D", 57.048, 9.919),
+            ]
 
 def hardcodedInput():
     return [  
@@ -160,16 +184,18 @@ if __name__ == "__main__" :
             if not v == w:
                 g.addEdge(Edge(v, w, v.haversineDistance(w)))
 
-    # verticeMap = dict()
-    # table = [ dict for _ in range(len(g.V))]
+    verticeMap = dict()
+    table = [ [] for _ in range(len(g.V))]
 
-    # i = 0
-    # for e in g.allEdges():
-    #     table[e.src].append(e.src.haversineDistance(e.dst))
-    #     verticeMap[i] = e.src
-    #     i += 1
+    i = 0
+    for e in g.allEdges():
+        table[e.src.key].append(e.src.haversineDistance(e.dst))
+        verticeMap[i] = e.src
+        i += 1
     
-    # print(np.matrix(table))
+    print(np.matrix(table))
+
+    g.TspDP()
 
     # path = []
     # for i in range(len(table)):
@@ -181,6 +207,6 @@ if __name__ == "__main__" :
     #             pos = j
     #     path.append((pos,dist))
 
-    for v in path:
-        (pos,dist) = v
-        print(verticeMap[pos])
+    # for v in path:
+    #     (pos,dist) = v
+    #     print(verticeMap[pos])
