@@ -1,157 +1,43 @@
-import sys
-import itertools
 import math
-import numpy as np
+import itertools
+from collections import defaultdict
 
-class Vertex:
-    def __init__(self, key:int, name:str, lat:float, lon:float):
-        self.key = key
-        self.name = name
+class WeightedGraph():
+    def __init__(self):
+        self.edges = C = defaultdict(lambda: defaultdict(lambda: float('inf')))
+
+    def V(self):
+        return list(self.edges.keys())
+
+    def addEdge(self, v:int, u:int, cost:float):
+        self.edges[v][u] = cost
+
+    def getCost(self, v:int, u:int):
+        return self.edges[v][u]
+
+    def print(self):
+        print(self.edges)
+
+class GeoCoord:
+    def __init__(self, lat:float, lon:float):
         self.lat = lat
         self.lon = lon
 
-    def __str__(self):
-        return f"{self.key} {self.name} ({self.lat} | {self.lon})"
+def haversineDistance(src:GeoCoord, dst:GeoCoord) -> float:
+    pi180 = math.pi/180
+    phi1 = src.lat * pi180
+    phi2 = dst.lat * pi180
+    dPhi = (dst.lat-src.lat) * pi180
+    dLambda = (src.lon-dst.lon) * pi180
 
-    def haversineDistance(self,dst:'Vertex') -> float:
-        pi180 = math.pi/180
-        phi1 = self.lat * pi180
-        phi2 = dst.lat * pi180
-        dPhi = (dst.lat-self.lat) * pi180
-        dLambda = (self.lon-dst.lon) * pi180
-
-        R = 6371e3 # metres
-        a = math.sin(dPhi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dLambda/2)**2 # Haversine
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt((1-a)))
-        d = R*c
-        return d
-
-class Edge:
-    def __init__(self, src:Vertex, dst:Vertex, weight:float):
-        self.src = src
-        self.dst = dst
-        self.weight = weight
-
-    def __str__(self):
-        return f"{self.src.key} -> ({self.weight}) -> {self.dst.key}"
-
-class Graph:
-    def __init__(self):
-        self.V = dict()
-        self.E = 0
-
-    def __len__(self):
-        len(self.V.keys())
-
-    def addVertex(self, v:Vertex) -> bool:
-        if v not in self.V:
-            self.V[v] = []
-            return True
-        else:
-            False
-
-    def addVertices(self, vertices:list):
-        count = 0
-        for v in vertices:
-            if self.addVertex(v):
-                count += 1
-        return count
-
-    def allVerticeKeys(self) -> list:
-        return list(self.V.keys())
-
-    def addEdge(self, edge:Edge):
-        self.V[edge.src].append(edge)
-        self.E += 1
-
-    def addEdges(self, edges):
-        for edge in edges:
-            self.addEdge(self, edge)
-
-    def adjEdges(self, v:Vertex) -> list:
-        return self.V[v]
-
-    def allEdgeKeyPairs(self) -> int:
-        pairs = []
-        for k in self.V.keys():
-            for edge in self.V[k]:
-                pairs.append((k.key, edge.dst.key))
-        return pairs
-
-    def allEdges(self):
-        pairs = []
-        for k in self.V.keys():
-            pairs.extend((self.V[k]))
-        return pairs
-
-    def edgeExists(self, src, dst):
-        True if dst in self.V[src] else False
-
-    def copy(self):
-        g = Graph()
-        g.V = self.V.copy()
-        g.E = self.E
-        return g
-
-    def print(self):
-        print(f"# of vertices: {len(self.V)}")
-        print("Vertices: ")
-        for v in self.V:
-            print(v)
-        print()
-        print(f"# of edges: {self.E}")
-        print(self.allEdgeKeyPairs())
-    
-    def isConnected(self):
-        visited = [0 for _ in range(len(self.V))]
-        print(len(visited))
-        start = list(self.V.keys())[0]
-        adj = list(self.V[start])
-        while adj:
-            e = adj.pop()
-            visited[e.src.key] = 1
-            if visited[e.dst.key] == 0:
-                    adj.extend(self.V[e.dst])
-
-        return sum(visited) == len(self.V)
-
-    def setup(self, m, memo, S, N):
-         for e in self.addEdges():
-            if S == e.src: continue
-            memo[e.src.key, e.dst.key]
-        
-
-    def TspDP(self, m, S):
-        N = len(self.V)
-        memo = np.zeros((N, N))
-
-        self.setup(m, memo, S, N)
-        print(memo)
-        # self.solve(m, memo, S, N)
-        # minCost = self.findMinCost(m, memo, S, N)
-        # tour = self.findMintour(m , memo, S, N)
-
-        # return (minCost, tour)
-    
-def readInput():
-    cities = []
-    for line in sys.stdin.readlines():
-        name, coords = line.split(",")
-        lat, lon = coords.split("/")
-        cities.append((name, float(lat), float(lon)))
-    return cities
-
-
-def simpleGraphInput():
-    return [  
-            ("A", 55.676, 12.566),
-            ("B", 56.157, 10.211),
-            ("C", 55.396, 10.388),
-            ("D", 57.048, 9.919),
-            ]
+    R = 6371e3 # metres
+    a = math.sin(dPhi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(dLambda/2)**2 # Haversine
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt((1-a)))
+    d = R*c
+    return d
 
 def hardcodedInput():
-    return [  
+    return [
             ("Copenhagen", 55.676, 12.566),
             ("Aarhus", 56.157, 10.211),
             ("Odense", 55.396, 10.388),
@@ -170,43 +56,62 @@ def hardcodedInput():
             ("Grenaa", 56.413142, 10.879211)
             ]
 
-if __name__ == "__main__" : 
+def cities(g):
     cities = hardcodedInput()
 
-    g = Graph()
-    # Add vertices:
     for i in range(len(cities)):
-        v = Vertex(i, cities[i][0],cities[i][1],cities[i][2])
-        g.addVertex(v)
+        for j in range(len(cities)):
+            if not i==j:
+                gc1 = GeoCoord(cities[i][1], cities[i][2])
+                gc2 = GeoCoord(cities[j][1], cities[j][2])
+                h = haversineDistance(gc1, gc2)
+                g.addEdge(i,j, h)
+    return g, min(g.V())
 
-    for v in g.allVerticeKeys():
-        for w in g.allVerticeKeys():
-            if not v == w:
-                g.addEdge(Edge(v, w, v.haversineDistance(w)))
 
-    verticeMap = dict()
-    table = [ [] for _ in range(len(g.V))]
-
-    i = 0
-    for e in g.allEdges():
-        table[e.src.key].append(e.src.haversineDistance(e.dst))
-        verticeMap[i] = e.src
-        i += 1
+def simple(g):
+    cities = [  (1,2,10), (1,3,15), (1,4,20),
+            (2,1,10), (2,3,35), (2,4,25),
+            (3,1,15), (3,2,35), (3,4,30),
+            (4,1,20), (4,2,25), (4,3,30)]
     
-    print(np.matrix(table))
+    #Add to graph
+    for edge in cities:
+        g.addEdge(edge[0], edge[1], edge[2])
+    return g, min(g.V())
 
-    g.TspDP()
+def dptsp():
+    g = WeightedGraph()
+    g, start = cities(g)
+    # g, start = simple(g)
+    N = len(g.V())
+    C = defaultdict(lambda: defaultdict(lambda: (float('inf'), [])))
+    for i in range(2, N+1):
+        for S in itertools.combinations([v for v in g.V()], i):
+            for s in S:
+                if s == start:
+                    continue
+                elif i == 2:
+                    C[S][s] = (g.edges[S[0]][S[1]], [start, s])
+                else:
+                    t = tuple(filter(lambda x: x!= s, S))
+                    C[S][s] = min([(C[t][k][0] + g.getCost(k,s), C[t][k][1]+[s]) for k in S if k != s and k !=start])
 
-    # path = []
-    # for i in range(len(table)):
-    #     pos = -1
-    #     dist = float("inf")
-    #     for j in range(len(table[i])):
-    #         if table[i][j] < dist:
-    #             dist = table[i][j]
-    #             pos = j
-    #     path.append((pos,dist))
+    tours = []
+    t = tuple(g.V())
+    for j in range(2,N+1):
+        tours.append((C[t][j][0] + g.getCost(j,start), C[t][j][1]+[start]))
+    best = min(tours)
+    
+    cost = best[0]
+    tour = best[1]
+    print(f"tour: {tour}")
+    print()
+    print("Citynames:")
+    for v in tour:
+        print(f"{v} {hardcodedInput()[v][0]}")
 
-    # for v in path:
-    #     (pos,dist) = v
-    #     print(verticeMap[pos])
+    print()
+    print(f"Cost: {cost}")
+
+dptsp()
