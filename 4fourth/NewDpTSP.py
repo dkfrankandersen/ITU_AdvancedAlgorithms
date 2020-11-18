@@ -6,7 +6,7 @@ from collections import defaultdict
 
 class DirectedWeightedGraph():
     def __init__(self):
-        self.edges = C = defaultdict(lambda: defaultdict(int))
+        self.edges = C = defaultdict(lambda: defaultdict(lambda: float('inf')))
 
     def V(self):
         return list(self.edges.keys())
@@ -59,36 +59,36 @@ def hardcodedInput():
             ("Grenaa", 56.413142, 10.879211)
             ]
 
-if __name__ == "__main__" :
-    # cities = hardcodedInput()
-    # N = len(cities)
-    # g = DirectedWeightedGraph(N)
+def cities():
+    cities = hardcodedInput()
+    g = DirectedWeightedGraph()
 
-    # for i in range(len(cities)):
-    #     for j in range(len(cities)):
-    #         if not i==j:
-    #             gc1 = GeoCoord(cities[i][1], cities[i][2])
-    #             gc2 = GeoCoord(cities[j][1], cities[j][2])
-    #             g.addEdge(i,j, haversineDistance(gc1, gc2))
+    for i in range(len(cities)):
+        for j in range(len(cities)):
+            if not i==j:
+                gc1 = GeoCoord(cities[i][1], cities[i][2])
+                gc2 = GeoCoord(cities[j][1], cities[j][2])
+                h = haversineDistance(gc1, gc2)
+                g.addEdge(i,j, h)
+    return g, min(g.V())
 
 
-
-
-    # cities = [(1,2,10), (1,3,15), (1,4,20),
-    #         (2,1,10), (2,3,35), (2,4,25),
-    #         (3,1,15), (3,2,35), (3,4,30),
-    #         (4,1,20), (4,2,25), (4,3,30)]
+def simple():
     cities = [  (1,2,10), (1,3,15), (1,4,20),
-                (2,1,10), (2,3,35), (2,4,25),
-                (3,1,15), (3,2,35), (3,4,30),
-                (4,1,20), (4,2,25), (4,3,30)]
+            (2,1,10), (2,3,35), (2,4,25),
+            (3,1,15), (3,2,35), (3,4,30),
+            (4,1,20), (4,2,25), (4,3,30)]
     g = DirectedWeightedGraph()
     #Add to graph
     for edge in cities:
         g.addEdge(edge[0], edge[1], edge[2])
+    return g, min(g.V())
+
+if __name__ == "__main__" :
+    g, start = cities()
+    # g, start = simple()
     N = len(g.V())
-    start = 1
-    C = defaultdict(lambda: defaultdict(int))
+    C = defaultdict(lambda: defaultdict(lambda: float('inf')))
     for i in range(2, N+1):
         for S in itertools.combinations([v for v in g.V()], i):
             for s in S:
@@ -98,25 +98,14 @@ if __name__ == "__main__" :
                     C[S][s] = g.edges[S[0]][S[1]]
                 else:
                     t = tuple(filter(lambda x: x!= s, S))
-
                     C[S][s] = min([C[t][k] + g.getCost(k,s) for k in S if k != s and k !=start])
-                    
-                    # result = []
-                    # for k in S:
-                    #     if k != s and k !=start:
-                    #         a = C[t][k]
-                    #         b = g.getCost(k,s)
-                    #         # print(f"t: {t} k,s: ({k},{s}) a: {a} b: {b}")
-                    #         result.append(a+b)
-                    # C[S][s] = min(result)
 
-    # for c in C.keys():
-    #     print(c)
-    #     print(C[c])
-    # tsp = []
-    # for j in range(2,N+1):
-    #     c1 = C[tuple(g.V())][j]
-    #     c2 = g.getCost(j,start)
-    #     print(f"c1: {c1} c2: {c2} total: {c1+c2}")
-    tsp = min([C[tuple(g.V())][j] + g.getCost(j,start) for j in range(2,N+1)])
+    # tsp = [C[tuple(g.V())][j] + g.getCost(j,start) for j in range(2,N+1)]
+    tsp = []
+    for j in range(2,N+1):
+        t = tuple(g.V())
+        a = C[t][j]
+        b = g.getCost(j,start)
+        print(f"t {t} a {a} b {b}")
+        tsp.append((a + b, j))
     print(tsp)
