@@ -6,19 +6,16 @@ from collections import defaultdict
 
 class DirectedWeightedGraph():
     def __init__(self):
-        self.edges = defaultdict(dict)
-
-    def N(self):
-        return len(self.edges)
+        self.edges = C = defaultdict(lambda: defaultdict(int))
 
     def V(self):
-        return [k for k in self.edges.keys()]
+        return list(self.edges.keys())
 
-    def addEdge(self, v:int, u:int, weight:float):
-        self.edges[v][u] = weight
+    def addEdge(self, v:int, u:int, cost:float):
+        self.edges[v][u] = cost
 
-    def edgeTo(self, src):
-        return self.edges[src]
+    def getCost(self, v:int, u:int):
+        return self.edges[v][u]
 
     def print(self):
         print(self.edges)
@@ -77,28 +74,49 @@ if __name__ == "__main__" :
 
 
 
-    cities = [(1,2,10), (1,3,15), (1,4,20),
-            (2,1,10), (2,3,35), (2,4,25),
-            (3,1,15), (3,2,35), (3,4,30),
-            (4,1,20), (4,2,25), (4,3,30)]
-
+    # cities = [(1,2,10), (1,3,15), (1,4,20),
+    #         (2,1,10), (2,3,35), (2,4,25),
+    #         (3,1,15), (3,2,35), (3,4,30),
+    #         (4,1,20), (4,2,25), (4,3,30)]
+    cities = [  (1,2,10), (1,3,15), (1,4,20),
+                (2,1,10), (2,3,35), (2,4,25),
+                (3,1,15), (3,2,35), (3,4,30),
+                (4,1,20), (4,2,25), (4,3,30)]
     g = DirectedWeightedGraph()
     #Add to graph
     for edge in cities:
         g.addEdge(edge[0], edge[1], edge[2])
+    N = len(g.V())
     start = 1
-    C = defaultdict(int)
-    for i in range(2, g.N()):
-        print(f"i: {i}")
-        for S in itertools.combinations([v for v in g.V() if not v == start], i):
-            print(f" S: {S}")
-            vertices = tuple([start]) + tuple(S)
-            if i==2:
-                C[vertices] = g.edges[start][S[0]]
-            else: 
-                values = []
-                for last in S:
-                    values.append(C[vertices[:-1]] + g.edges[start][last])
-                C[vertices] = min(values)
+    C = defaultdict(lambda: defaultdict(int))
+    for i in range(2, N+1):
+        for S in itertools.combinations([v for v in g.V()], i):
+            for s in S:
+                if s == start:
+                    continue
+                elif i == 2:
+                    C[S][s] = g.edges[S[0]][S[1]]
+                else:
+                    t = tuple(filter(lambda x: x!= s, S))
 
-print(C)
+                    C[S][s] = min([C[t][k] + g.getCost(k,s) for k in S if k != s and k !=start])
+                    
+                    # result = []
+                    # for k in S:
+                    #     if k != s and k !=start:
+                    #         a = C[t][k]
+                    #         b = g.getCost(k,s)
+                    #         # print(f"t: {t} k,s: ({k},{s}) a: {a} b: {b}")
+                    #         result.append(a+b)
+                    # C[S][s] = min(result)
+
+    # for c in C.keys():
+    #     print(c)
+    #     print(C[c])
+    # tsp = []
+    # for j in range(2,N+1):
+    #     c1 = C[tuple(g.V())][j]
+    #     c2 = g.getCost(j,start)
+    #     print(f"c1: {c1} c2: {c2} total: {c1+c2}")
+    tsp = min([C[tuple(g.V())][j] + g.getCost(j,start) for j in range(2,N+1)])
+    print(tsp)
