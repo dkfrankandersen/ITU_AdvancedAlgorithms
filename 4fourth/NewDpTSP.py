@@ -88,24 +88,29 @@ if __name__ == "__main__" :
     g, start = cities()
     # g, start = simple()
     N = len(g.V())
-    C = defaultdict(lambda: defaultdict(lambda: float('inf')))
+    C = defaultdict(lambda: defaultdict(lambda: (float('inf'), [])))
     for i in range(2, N+1):
         for S in itertools.combinations([v for v in g.V()], i):
             for s in S:
                 if s == start:
                     continue
                 elif i == 2:
-                    C[S][s] = g.edges[S[0]][S[1]]
+                    C[S][s] = (g.edges[S[0]][S[1]], [start, s])
                 else:
                     t = tuple(filter(lambda x: x!= s, S))
-                    C[S][s] = min([C[t][k] + g.getCost(k,s) for k in S if k != s and k !=start])
+                    C[S][s] = min([(C[t][k][0] + g.getCost(k,s), C[t][k][1]+[s]) for k in S if k != s and k !=start])
 
     # tsp = [C[tuple(g.V())][j] + g.getCost(j,start) for j in range(2,N+1)]
-    tsp = []
+    tours = []
+    t = tuple(g.V())
     for j in range(2,N+1):
-        t = tuple(g.V())
-        a = C[t][j]
+        a = C[t][j][0]
         b = g.getCost(j,start)
-        print(f"t {t} a {a} b {b}")
-        tsp.append((a + b, j))
-    print(tsp)
+        # print(f"j {j} t {t} a {a} b {b} total {a+b}")
+        tours.append((a + b, C[t][j][1]+[start]))
+    tour = min(tours)
+
+    print(tour)
+
+    for v in tour[1]:
+        print(hardcodedInput()[v])
