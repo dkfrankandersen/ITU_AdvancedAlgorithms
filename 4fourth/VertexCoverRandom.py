@@ -1,14 +1,19 @@
 import sys
 from typing import DefaultDict
 import cplex
-
+import random
 
 def buildGraph():
     graph = DefaultDict(list)
-    for line in sys.stdin.readlines():
-        v,w =  map(int, line.strip().split(" "))
-        graph[v].append(w)
-        graph[w].append(v)
+
+    for i in range(0,200):
+        graph[i]
+
+    for v in graph:
+        for w in graph:
+            if v != w:
+                if random.randint(0,10) > 1:
+                    graph[v].append(w)
 
     return graph
 
@@ -24,7 +29,6 @@ def vertexCover(g):
                     break
 
     return sum(visited), visited
-
 
 def cplexLpSolver(g):
     prob = cplex.Cplex()
