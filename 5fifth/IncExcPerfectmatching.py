@@ -1,6 +1,9 @@
 import math
+from threading import Timer
 import numpy as np
 import itertools
+import time
+import threading
 
 # Kasteleyns Formular:
 def kasteleyns(n:int,m:int):
@@ -58,16 +61,25 @@ def incExcPerfectMatching(n,m):
     # print(f"Inclusion-Exclusion: {n}x{m} = {cumulatedSum}")
     return abs(cumulatedSum)
 
+def compare(i,j):
+    t = Timer.start
+    ka = kasteleyns(i,j)
+    ie = incExcPerfectMatching(i,j)
+    test = "OK" if ka==ie else "WRONG"
+    print(f"{test} for {i}x{j} = {i*j} kasteleyns == incExcPerfectMatching {ka} == {ie}")
 
-def compareTest(n):
+
+
+def compareLoop(n):
     print(f"Comparing for 2..{n}")
     for i in range(2,n):
-        for j in range(2,n):
-            ka = kasteleyns(i,j)
-            ie = incExcPerfectMatching(i,j)
-            test = "OK" if ka==ie else "WRONG"
-            print(f"{test} for {i}x{j} kasteleyns == incExcPerfectMatching {ka} == {ie}")
+        # for j in range(2,n):
+        j = i
+        # compare(i,j)
+        t = threading.Thread(target=compare, args=(i,j))
+        t.start()
+        print(f"start thread compare({i},{j})")
 
 
 if __name__ == "__main__":
-    compareTest(10)
+    compareLoop(10)
