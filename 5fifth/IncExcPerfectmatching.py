@@ -1,7 +1,9 @@
 import math
+from time import sleep
 import numpy as np
 import itertools
 import threading
+from timeit import default_timer as timer
 
 # Kasteleyns Formular:
 def kasteleyns(n:int,m:int):
@@ -39,10 +41,12 @@ def gridToGraph(n,m):
     return vertices, sorted(edges)
 
 
-def incExcPerfectMatching(n,m):
+def incExcPerfectMatching(n,m,limit):
     nHalf = (n*m) // 2
     vertices,edges = gridToGraph(n,m)
     cumulatedSum = 0
+    
+    tStart = timer()
     # For all vertices (starts 1)
     for i in range(1, len(vertices) + 1):
         # All combinations of vertices of lenght i 
@@ -55,27 +59,43 @@ def incExcPerfectMatching(n,m):
                         count += 1
                         break # break if match in c found
             cumulatedSum += (-1)**len(combinations) * math.comb(count, nHalf)
+            if timer()-tStart > limit:
+                return None
     
     # print(f"Inclusion-Exclusion: {n}x{m} = {cumulatedSum}")
     return abs(cumulatedSum)
 
-def compare(i,j):
+def compare(i,j,limit):
     ka = kasteleyns(i,j)
-    ie = incExcPerfectMatching(i,j)
-    test = "OK" if ka==ie else "WRONG"
+    ie = incExcPerfectMatching(i,j,limit)
+    
+    test = "WRONG"
+    res = 0
+    if ie==None:
+        test = "LIMIT"
+        res = -1
+    elif ka==ie:
+        test = "OK" 
+        res = 1
+
+
     print(f"{test} for {i}x{j} = {i*j} kasteleyns ({ka}) vs. incExcPerfectMatching ({ie})")
-
-
+    return res
 
 def compareLoop(n):
-    print(f"Comparing for 2..{n}")
+    timeLimit = 60
+    print(f"Comparing for grid 2x2 ...{n}x{n}, time limit {timeLimit}s per grid")
     for i in range(2,n):
         for j in range(2,n):
-            t = threading.Thread(target=compare, args=(i,j))
-            # print(f"start thread compare({i},{j})")
-            t.start()
+            res = compare(i,j,timeLimit)
+            if res == -1:
+                print(f"Breaking at {i}x{j}, goto next i")
+                break
             
-
+            # t = threading.Thread(target=compare, args=(j,i))
+            # print(f"start thread compare({i},{j})")
+            # t.start()
+    
 
 if __name__ == "__main__":
-    compareLoop(10)
+    compareLoop(12)
