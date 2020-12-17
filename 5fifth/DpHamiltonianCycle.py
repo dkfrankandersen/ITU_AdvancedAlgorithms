@@ -54,14 +54,16 @@ def dpHC(vertices, edges):
                 else:
                     exLast = visited[:-1]
                     twoLast = visited[-2:]
-                    if C.get(exLast) == True and adj[twoLast[0]][twoLast[1]]:
+                    if C.get(exLast) == True and adj[twoLast[0]][twoLast[1]] == 1:
                         C[visited] = True
-        
-    count = 0
-    for k in C.keys():
-        if len(k) == N:
-            count +=1
 
+    count = 0
+    for k,v in C.items():
+        # last = k[-1:]
+        last = k[-1:]
+        if len(k) == N and adj[last[0]][start]:
+            # print(f"{k} -> {v}")
+            count +=1
     return (int(count/2))
 
 def createCompleteGraph(n):
@@ -74,13 +76,24 @@ def createCompleteGraph(n):
     return vertices, sorted(edges)
 
 if __name__ == "__main__":
-    # idToName, vertices, edges = graphFromInput()
+    idToName, vertices, edges = graphFromInput()
+    tStart = timer()
+    res = dpHC(vertices, edges)
+    tEnd = timer()
+    print(f"Vertices: {len(vertices)} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
 
     for i in range(4,20,2):
         vertices, edges = createCompleteGraph(i)
-    # print(edges)
         tStart = timer()
         res = dpHC(vertices, edges)
         tEnd = timer()
         print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
+
+    # i = 6
+    # vertices, edges = createCompleteGraph(i)
+    # tStart = timer()
+    # res = dpHC(vertices, edges)
+    # tEnd = timer()
+    # print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
+    
     
