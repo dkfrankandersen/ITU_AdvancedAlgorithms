@@ -2,22 +2,8 @@ import math
 import itertools
 from collections import defaultdict
 import sys
-
-class WeightedGraph():
-    def __init__(self):
-        self.edges = defaultdict(lambda: defaultdict(lambda: float('inf')))
-
-    def V(self):
-        return list(self.edges.keys())
-
-    def addEdge(self, v:int, u:int, cost:float):
-        self.edges[v][u] = cost
-
-    def getCost(self, v:int, u:int):
-        return self.edges[v][u]
-
-    def print(self):
-        print(self.edges)
+from timeit import default_timer as timer
+import numpy as np
 
 def graphFromInput():
     edges = []
@@ -42,34 +28,59 @@ def graphFromInput():
 
     return idToName, vertices, sorted(edges)
 
-def dpHC(g: WeightedGraph):
-    start = 0
-    N = len(g.V())
-    C = defaultdict(lambda: defaultdict(lambda: []))
-    for i in range(2, N+1):
-        for S in itertools.combinations([v for v in g.V()], i):
-            for s in S:
-                if s == start:
-                    continue
-                elif i == 2:
-                    C[S][s] = ([start, s])
-                else:
-                    t = tuple(filter(lambda x: x!= s, S))
-                    # C[S][s] = min([(C[t][k][0] + g.getCost(k,s), C[t][k][1]+[s]) for k in S if k != s and k !=start])
-                    C[S][s] = min([(C[t][k]+[s]) for k in S])
-                    
+def adjMatrix(vertices, edges):
+    # Create adjacency matrix
+    N = len(vertices)
+    adj = np.array([[0 for _ in range(0, N)] for _ in range(0, N)])
+    for u,v in edges:
+        adj[u][v] = 1
+        adj[v][u] = 1
+    return adj
 
-    tours = []
-    t = tuple(g.V())
-    for j in range(2,N+1):
-        if len(C[t][j]+[start]) == N+1:
-            tours.append(C[t][j]+[start])
-    print(len(tours))
-    print(tours)
+def dpHC(vertices, edges):
+    start = sorted(vertices)[0]
+    adj = adjMatrix(vertices, edges)
+    N = len(vertices)
+    C = defaultdict(bool)
+    excludingStart = list(filter(lambda x: x!= start, vertices))
+
+    for i in range(1, N+1):
+        perm = list(itertools.permutations(excludingStart, i))
+        for S in perm:
+            visited = tuple([start])+S
+            for s in S:
+                if i < 2 and adj[start][s]:
+                        C[visited] = True
+                else:
+                    exLast = visited[:-1]
+                    twoLast = visited[-2:]
+                    if C.get(exLast) == True and adj[twoLast[0]][twoLast[1]]:
+                        C[visited] = True
+        
+    count = 0
+    for k in C.keys():
+        if len(k) == N:
+            count +=1
+
+    return (int(count/2))
+
+def createCompleteGraph(n):
+    vertices = list(range(0,n))
+    edges = []
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                edges.append((i,j))
+    return vertices, sorted(edges)
 
 if __name__ == "__main__":
-    idToName, vertices, edges = graphFromInput()
-    g = WeightedGraph()
-    for u,v in edges:
-        g.addEdge(u,v,0)
-    dpHC(g)
+    # idToName, vertices, edges = graphFromInput()
+
+    for i in range(4,20,2):
+        vertices, edges = createCompleteGraph(i)
+    # print(edges)
+        tStart = timer()
+        res = dpHC(vertices, edges)
+        tEnd = timer()
+        print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
+    

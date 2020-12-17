@@ -2,6 +2,7 @@ import numpy as np
 from itertools import combinations
 from numpy.linalg import matrix_power
 import sys
+from timeit import default_timer as timer
 
 def gridToGraph(n,m):
     # Created vertice grid of n x m size
@@ -25,7 +26,6 @@ def gridToGraph(n,m):
             edges.append((v1, names[(r,c+1)])) # Right
 
     return vertices, sorted(edges)
-
 
 def graphFromInput():
     edges = []
@@ -51,14 +51,12 @@ def graphFromInput():
     return idToName, vertices, sorted(edges)
 
 def adjMatrix(vertices, edges):
+    # Create adjacency matrix
     N = len(vertices)
-    adj = np.array([
-                            [0 for _ in range(0, N)] for _ in range(0, N)
-                         ])
+    adj = np.array([[0 for _ in range(0, N)] for _ in range(0, N)])
     for u,v in edges:
         adj[u][v] = 1
         adj[v][u] = 1
-
     return adj
 
 def incExcHC(vertices, edges):
@@ -68,11 +66,26 @@ def incExcHC(vertices, edges):
     for i in range(2, N+1):
         neg = (-1)**(N-i)
         for S in combinations(range(N), i):
-            subMat = adjMat[np.ix_(S,S)]
-            totalSum += neg * matrix_power(subMat, N).trace()
+            subMatrix = np.array(adjMat[np.ix_(S,S)], dtype=object)
+            totalSum += neg * matrix_power(subMatrix, N).trace()
     return int((totalSum/N)/2)
 
+def createCompleteGraph(n):
+    vertices = list(range(0,n))
+    edges = []
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                edges.append((i,j))
+    return vertices, sorted(edges)
+
 if __name__ == "__main__":
-    # graph = gridToGraph(4,4)
     idToName, vertices, edges = graphFromInput()
-    print(incExcHC(vertices, edges))
+    res = incExcHC(vertices, edges)
+    print(f"Vertices: {len(vertices)} HC Found: {res} ")
+    for i in range(2,20,2):
+        vertices, edges = createCompleteGraph(i)
+        tStart = timer()
+        res = incExcHC(vertices, edges)
+        tEnd = timer()
+        print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
