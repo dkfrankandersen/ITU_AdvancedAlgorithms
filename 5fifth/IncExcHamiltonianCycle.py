@@ -81,9 +81,12 @@ def createCompleteGraph(n):
 
 if __name__ == "__main__":
     idToName, vertices, edges = graphFromInput()
+    tStart = timer()
     res = incExcHC(vertices, edges)
-    print(f"Vertices: {len(vertices)} HC Found: {res} ")
-    for i in range(2,20,2):
+    tEnd = timer()
+    print(f"House Vertices: {len(vertices)} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
+
+    for i in range(1,20):
         vertices, edges = createCompleteGraph(i)
         tStart = timer()
         res = incExcHC(vertices, edges)

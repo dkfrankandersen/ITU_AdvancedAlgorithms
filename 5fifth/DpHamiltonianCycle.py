@@ -44,7 +44,7 @@ def dpHC(vertices, edges):
     C = defaultdict(bool)
     excludingStart = list(filter(lambda x: x!= start, vertices))
 
-    for i in range(1, N+1):
+    for i in range(1, N):
         perm = list(itertools.permutations(excludingStart, i))
         for S in perm:
             visited = tuple([start])+S
@@ -56,7 +56,6 @@ def dpHC(vertices, edges):
                     twoLast = visited[-2:]
                     if C.get(exLast) == True and adj[twoLast[0]][twoLast[1]] == 1:
                         C[visited] = True
-
     count = 0
     for k,v in C.items():
         # last = k[-1:]
@@ -80,20 +79,13 @@ if __name__ == "__main__":
     tStart = timer()
     res = dpHC(vertices, edges)
     tEnd = timer()
-    print(f"Vertices: {len(vertices)} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
+    print(f"House Vertices: {len(vertices)} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
 
-    for i in range(4,20,2):
+    for i in range(1,20):
         vertices, edges = createCompleteGraph(i)
         tStart = timer()
         res = dpHC(vertices, edges)
         tEnd = timer()
         print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
-
-    # i = 6
-    # vertices, edges = createCompleteGraph(i)
-    # tStart = timer()
-    # res = dpHC(vertices, edges)
-    # tEnd = timer()
-    # print(f"Vertices: {i} Time {(tEnd-tStart):.4f}s HC Found: {res} ")
     
     
