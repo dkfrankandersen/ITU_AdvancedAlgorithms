@@ -84,10 +84,10 @@ def testcase_square():
     adjMatrix[1,2] = 1
     adjMatrix[2,1] = 1
     adjMatrix[2,3] = 1
-    adjMatrix[2,3] = 1
+    adjMatrix[3,2] = 1
     adjMatrix[3,0] = 1
     adjMatrix[0,3] = 1
-    for k in range(2,5):
+    for k in range(1,5):
         result = FPTVertexCover(adjMatrix, k)
         print(f"k: {k}, {result}")
 
