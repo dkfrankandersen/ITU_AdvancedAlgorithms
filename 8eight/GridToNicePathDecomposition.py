@@ -42,9 +42,8 @@ def decomposeGridGraph(a):
     T = []
     for i in range(len(aT)):
         t = []
-        if i > 0:
-            t.extend([v for v in aT[i-1]])
-        t.extend([v for v in aT[i]])
+        if i > 0: t.extend(aT[i-1])
+        t.extend(aT[i])
         T.append(t)
     return T
 
