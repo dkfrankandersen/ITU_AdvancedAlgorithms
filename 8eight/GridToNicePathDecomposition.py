@@ -4,15 +4,12 @@ import numpy as np
 def gridToGraph(n,m):
     # Created vertice grid of n x m size
     grid = [(i,j) for j in range(m) for i in range(n)]
-
     # Create mapping from each grid coords to vertice id (0..n)
     names = dict()
     for v in range(len(grid)):
         names[grid[v]] = v
-
     # Vertices as id's
     vertices = list(names.values())
-
     # Add grid edges as an undirected graph, and replace coords with vertices id's (0..n)
     edges = []
     for (r,c) in grid:
@@ -33,15 +30,12 @@ def adjMatrix(vertices, edges):
         adj[v][u] = 1
     return adj
 
-
 class Node:
-    
     def __init__(self, type):
         self.type = type
         self.bag = set()
         self.child = None
         self.type = None
-
 
 def decomposeGridGraph(a):
     aT = a.T
