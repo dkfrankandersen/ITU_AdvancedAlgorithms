@@ -1,9 +1,11 @@
 import sys
 import numpy as np
+from numpy.lib.function_base import delete
 
 def gridToGraph(n,m):
     # Created vertice grid of n x m size
     grid = [(i,j) for j in range(m) for i in range(n)]
+    gridVer = np.zeros((n,m), dtype=int)
     # Create mapping from each grid coords to vertice id (0..n)
     names = dict()
     for v in range(len(grid)):
@@ -16,10 +18,12 @@ def gridToGraph(n,m):
         v1 = names[(r,c)]
         if (r+1) < n:
             edges.append((v1, names[(r+1,c)])) # Down
+            gridVer[r+1,c] = names[(r+1,c)]
         if (c+1) < m:
             edges.append((v1, names[(r,c+1)])) # Right
+            gridVer[r,c+1] = names[(r,c+1)]
 
-    return vertices, sorted(edges)
+    return vertices, sorted(edges), gridVer
 
 def adjMatrix(vertices, edges):
     # Create adjacency matrix
@@ -33,25 +37,61 @@ def adjMatrix(vertices, edges):
 class Node:
     def __init__(self, type):
         self.type = type
-        self.bag = set()
+        self.bag = []
         self.child = None
-        self.type = None
 
-def decomposeGridGraph(a):
+# def decomposeGridGraph(a):
+#     aT = a.T
+#     T = []
+#     for i in range(len(aT)):
+#         t = []
+#         if i > 0: t.extend(aT[i-1])
+#         t.extend(aT[i])
+#         T.append(t)
+#     return T
+
+def decomposeGridGraph2(a, adj):
     aT = a.T
-    T = []
+    root = Node("introduce")
+    node = root
+    
     for i in range(len(aT)):
-        t = []
-        if i > 0: t.extend(aT[i-1])
-        t.extend(aT[i])
-        T.append(t)
-    return T
+        for j in range(len(aT[i])):
+            w = aT[i,j]
+            node.bag.append(w)
+            for x in node.bag:
+                if x!=w and adj[w,x] == 0:
+                    childForget = Node("forget")
+                    childForget.bag.extend([v for v in node.bag if v != x])
+                    node.child = childForget
+                    node = childForget
+                    break
+            adj[i,j]
+            childIntro = Node("introduce")
+            childIntro.bag.extend(node.bag)
+            node.child = childIntro
+            node = childIntro
+    
+    n = root
+    while n != None:
+        print(n.type)
+        print(n.bag)
+        print()
+        n = n.child
+
+
 
 if __name__ == "__main__":
-    vertices, edges = gridToGraph(2,2)
+    vertices, edges, gridVer = gridToGraph(4,3)
+    print(gridVer)
     adj = adjMatrix(vertices, edges)
-    a =np.array([[11,12,13],[21,22,23],[31,32,33],[41,42,43]])
-    print(a)
-    print()
-    print("Decomposed graph")
-    print(decomposeGridGraph(a))
+    # print(edges)
+    # print(adj)
+    # a =np.array([[11,12,13],[21,22,23],[31,32,33],[41,42,43]])
+    
+    # print(a)
+    # print()
+    # # print("Decomposed graph")
+    # # print(decomposeGridGraph(a))
+    # # print()
+    decomposeGridGraph2(gridVer, adj.T)
