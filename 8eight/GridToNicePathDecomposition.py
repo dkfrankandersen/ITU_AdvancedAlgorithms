@@ -73,11 +73,11 @@ def decomposeGridGraph2(a, adj):
             node = childIntro
     
     n = root
+    i = 1
     while n != None:
-        print(n.type)
-        print(n.bag)
-        print()
+        print(i, n.type, n.bag)
         n = n.child
+        i+=1
 
 
 
